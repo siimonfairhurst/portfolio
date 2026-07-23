@@ -443,25 +443,37 @@ ICON_CHEVRON_RIGHT_SM = ICON_CHEVRON_RIGHT.replace('width="18" height="18"', 'wi
 # SHARED HEAD / CHROME
 # ---------------------------------------------------------------------------
 
-def head(title, description, css_rel="css/style.css"):
+def head(title, description, css_rel="css/style.css", asset_prefix=""):
     return f'''<meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{title}</title>
 
   <!-- Meta & SEO -->
   <meta name="description" content="{description}">
+  <meta name="robots" content="noindex, nofollow">
 
   <!-- Open Graph -->
   <meta property="og:title" content="{title}">
   <meta property="og:description" content="{description}">
-  <meta property="og:image" content="TODO: URL to social share image (1200x630px recommended)">
-  <meta property="og:url" content="TODO: live page URL">
+  <meta property="og:image" content="{asset_prefix}assets/og-image.png">
+  <meta property="og:url" content="TODO: live page URL, once this is deployed">
   <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="TODO: favicon.png">
+  <link rel="icon" type="image/png" href="{asset_prefix}assets/favicon-512.png">
+  <link rel="icon" type="image/x-icon" href="{asset_prefix}assets/favicon.ico">
+  <link rel="apple-touch-icon" href="{asset_prefix}assets/apple-touch-icon.png">
 
   <link rel="stylesheet" href="{css_rel}">'''
+
+
+def brand_link_html(css_prefix=""):
+    return (f'<a class="topbar__brand" href="{css_prefix}index.html">'
+            f'<span class="spark">✦</span>'
+            f'<span class="topbar__brand-full">Simon Fairhurst · 2026</span>'
+            f'<span class="topbar__brand-short">Simon F</span>'
+            f'</a>')
 
 
 def contact_href():
@@ -473,7 +485,7 @@ def contact_href():
 def top_home_chrome(css_prefix=""):
     return f'''  <header class="topbar">
     <div class="topbar__left">
-      <a class="topbar__brand" href="{css_prefix}index.html"><span class="spark">✦</span> Simon Fairhurst · 2026</a>
+      {brand_link_html(css_prefix)}
     </div>
     <div class="topbar__center">
       <nav class="topbar__nav" aria-label="Home sections">
@@ -523,7 +535,7 @@ def top_case_study_chrome(project, css_prefix=""):
     next_p = order[(idx + 1) % len(order)]
     return f'''  <header class="topbar">
     <div class="topbar__left">
-      <a class="topbar__brand" href="{css_prefix}index.html"><span class="spark">✦</span> Simon Fairhurst · 2026</a>
+      {brand_link_html(css_prefix)}
     </div>
     <div class="topbar__center">
       <nav class="switcher" aria-label="Case study switcher">
@@ -557,7 +569,7 @@ def card_fg_style(p):
 def stacked_card_html(p, index, total):
     tx, ty = index * FAN_STEP_X, index * FAN_STEP_Y
     z = total - index
-    style = f"--tx:{tx}px; --ty:{ty}px; --z:{z}; {card_fg_style(p)}"
+    style = f"--tx:{tx}px; --ty:{ty}px; --z:{z}; --index:{index}; {card_fg_style(p)}"
     is_first = index == 0
     return f'''      <a class="card stacked-card{' is-front' if is_first else ''}" href="case-studies/{p['slug']}.html" style="{style}">
         <img class="card__media" src="assets/cards/{p['slug']}.jpg" alt="{p['name']} case study cover" loading="lazy">
@@ -577,7 +589,7 @@ def swipe_card_html(p):
             <span class="card__tag"><span>{p['tag']}</span><span>{p['stat']}</span></span>
           </div>
           <span class="card__name">{p['name']}</span>
-          <a class="swipe-cta" href="case-studies/{p['slug']}.html">Read case study {ICON_ARROW}</a>
+          <a class="swipe-cta" href="case-studies/{p['slug']}.html"><span class="swipe-cta__full">Read case study</span><span class="swipe-cta__short">Read</span> {ICON_ARROW}</a>
         </div>'''
 
 
@@ -748,7 +760,7 @@ def build_case_study(p):
     html = f'''<!DOCTYPE html>
 <html lang="en">
 <head>
-  {head(p['name'] + " · Simon Fairhurst", p['overview'][:155].rsplit(' ',1)[0] + "…", css_rel="../css/style.css")}
+  {head(p['name'] + " · Simon Fairhurst", p['overview'][:155].rsplit(' ',1)[0] + "…", css_rel="../css/style.css", asset_prefix="../")}
   <style>:root{{ --accent: {p['accent']}; --accent-glow: {glow}; }}</style>
 </head>
 <body>

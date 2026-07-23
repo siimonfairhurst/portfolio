@@ -140,14 +140,15 @@ button:focus-visible,
   left: auto; right: auto;
 }
 
-.topbar__left, .bottombar__left { justify-self: start; min-width: 0; }
-.topbar__center, .bottombar__center { justify-self: center; }
+.topbar__left, .bottombar__left { justify-self: start; min-width: 0; overflow: hidden; }
+.topbar__center, .bottombar__center { justify-self: center; min-width: 0; overflow: hidden; }
 .topbar__right, .bottombar__right {
   justify-self: end;
   display: flex;
   align-items: center;
   gap: var(--m);
   min-width: 0;
+  overflow: hidden;
 }
 
 .topbar__brand {
@@ -157,6 +158,7 @@ button:focus-visible,
   color: var(--white);
   white-space: nowrap;
 }
+.topbar__brand-short { display: none; }
 .topbar__brand .spark { font-size: 14px; }
 
 .topbar__nav {
@@ -224,8 +226,20 @@ button:focus-visible,
 @media (max-width: 780px) {
   .topbar, .bottombar { padding: var(--s) var(--m); }
   .bottombar__meta { display: none; }
-  .switcher__name { min-width: 90px; font-size: var(--caption); }
   .cs-topbar-clock { display: none; }
+  .topbar__brand { font-size: var(--caption); gap: 4px; }
+  .topbar__brand .spark { display: none; }
+  .topbar__brand-full { display: none; }
+  .topbar__brand-short { display: inline; }
+  .topbar__nav { gap: var(--s); }
+  .topbar__nav button { font-size: var(--caption); }
+  .topbar__contact { font-size: var(--caption); }
+  .switcher { gap: var(--s); }
+  .switcher__name { min-width: 0; font-size: var(--caption); }
+  .swipe-cta__full { display: none; }
+  .swipe-cta__short { display: inline; }
+  .bottombar { display: flex; justify-content: center; }
+  .bottombar__left, .bottombar__center { display: none; }
 }
 
 /* ==========================================================================
@@ -283,6 +297,7 @@ button:focus-visible,
   width: 40px; height: 40px;
   border-radius: 50%;
   background: rgba(22,22,22,0.55);
+  -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
   display: flex; align-items: center; justify-content: center;
   color: var(--white);
@@ -320,6 +335,13 @@ button:focus-visible,
   width: 100%;
   height: 100vh;
 }
+.stacked-stage, .swipe-stage {
+  transition: opacity .28s ease, transform .28s ease;
+}
+.stacked-stage:not(.stage-in), .swipe-stage:not(.stage-in) {
+  opacity: 0;
+  transform: scale(.95);
+}
 .stacked-stack {
   position: absolute;
   top: 50%;
@@ -330,6 +352,15 @@ button:focus-visible,
      card: self-center (-50%) then shift back by half the total spread. */
   transform: translate(calc(-50% - var(--fan-half-x, 162px)), calc(-50% - var(--fan-half-y, 93px)));
 }
+@keyframes cardEnter {
+  from { opacity: 0; transform: translate(var(--tx, 0px), calc(var(--ty, 0px) + 18px)) scale(.98); }
+  to   { opacity: 1; transform: translate(var(--tx, 0px), var(--ty, 0px)); }
+}
+.stacked-stage.is-entering .stacked-card {
+  animation: cardEnter .55s cubic-bezier(.16,.8,.24,1) both;
+  animation-delay: calc(var(--index, 0) * 70ms);
+}
+
 .stacked-card {
   position: absolute;
   top: 0; left: 0;
@@ -337,14 +368,14 @@ button:focus-visible,
   cursor: pointer;
   transform: translate(var(--tx, 0px), var(--ty, 0px));
   z-index: var(--z, 1);
-  transition: transform .2s cubic-bezier(.2,.7,.3,1);
+  transition: transform .3s ease-out;
   box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
   will-change: transform;
 }
 .stacked-card:hover, .stacked-card:focus-visible {
-  transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(1.03);
   z-index: 50;
 }
+
 .stacked-card .card__overlay-top,
 .stacked-card .card__name {
   transition: opacity .15s ease;
@@ -399,6 +430,7 @@ button:focus-visible,
   z-index: 3;
   display: flex; align-items: center; gap: var(--xs);
   background: rgba(22,22,22,0.55);
+  -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
   border: 1px solid var(--white-20);
   border-radius: 999px;
@@ -410,6 +442,7 @@ button:focus-visible,
 }
 .swipe-card-wrap:not(.is-top) .swipe-cta { opacity: 0; pointer-events: none; }
 .swipe-cta:hover { background: rgba(22,22,22,0.85); }
+.swipe-cta__short { display: none; }
 
 .swipe-chevron {
   position: absolute;
@@ -559,7 +592,7 @@ button:focus-visible,
 .cs-section { max-width: 68ch; margin: 0 auto; padding-bottom: var(--xxxxl); }
 .cs-section h2 { margin-bottom: var(--m); }
 .cs-section p + p { margin-top: var(--s); }
-.cs-section p { color: var(--white); font-size: var(--body); }
+.cs-section p { color: var(--white-60); font-size: var(--body); }
 
 .cs-row2 {
   display: grid;
@@ -599,10 +632,42 @@ button:focus-visible,
     grid-template-columns: 1fr;
     grid-template-areas: "label" "title" "overview" "meta";
     column-gap: 0;
-    row-gap: var(--l);
+    row-gap: 0;
+    padding-bottom: 32px;
   }
-  .cs-row2 { grid-template-columns: 1fr; }
+  .cs-header__label {
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+  .cs-header__title { font-size: 32px; margin-bottom: 24px; }
+  .cs-header__overview-col { margin-bottom: 24px; }
+  .cs-row2 { grid-template-columns: 1fr; gap: 12px; margin-bottom: 32px; }
   .cs-wrap { padding: 120px var(--m) 0; }
+
+  .cs-results { margin-top: 32px; }
+  .cs-visual { margin-bottom: 32px; }
+  .cs-section { padding-bottom: 32px; }
+
+  /* Images go fully edge-to-edge on mobile — the 24px gutter that works on
+     desktop just eats too much of a narrow screen. */
+  .cs-visual, .cs-row2 {
+    width: 100vw;
+    left: 50%;
+    margin-left: -50vw;
+  }
+  .cs-row2 .cs-visual { width: 100%; left: 0; margin-left: 0; }
+
+  /* Contact card: stack vertically and fit inside its own box — was
+     overflowing the rounded card at the default horizontal padding. */
+  .cs-cta {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px;
+    gap: 16px;
+    margin: 32px 0 60px;
+  }
+  .cs-cta__avatar { width: 56px; height: 56px; }
+  .cs-cta__text { width: 100%; }
 }
 
 /* Placeholder page (Mailboard-style "coming soon" — kept for future use) */

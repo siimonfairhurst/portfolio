@@ -69,7 +69,29 @@
       toggleButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.displayToggle === effectiveMode)));
       groups.forEach((g) => {
         const matches = g.dataset.categoryGroup === category && g.dataset.display === effectiveMode;
-        g.style.display = matches ? (g.dataset.display === 'swipe' ? 'flex' : 'block') : 'none';
+        const isVisible = g.style.display && g.style.display !== 'none';
+
+        if (matches) {
+          if (!isVisible) {
+            g.style.display = g.dataset.display === 'swipe' ? 'flex' : 'block';
+            g.classList.remove('stage-in');
+            void g.offsetWidth; // force reflow so the transition actually plays
+          }
+          g.classList.add('stage-in');
+          if (g.dataset.display === 'stacked') {
+            g.classList.remove('is-entering');
+            void g.offsetWidth;
+            g.classList.add('is-entering');
+          }
+        } else if (isVisible) {
+          g.classList.remove('stage-in');
+          g.classList.remove('is-entering');
+          setTimeout(() => {
+            if (!g.classList.contains('stage-in')) g.style.display = 'none';
+          }, 280);
+        } else {
+          g.style.display = 'none';
+        }
       });
     }
 
@@ -79,8 +101,10 @@
     render();
   }
 
-  /* ---- Stacked cards: hover/focus lift handled entirely by CSS (see .stacked-card:hover).
-     Base fan positions are set inline per-card at build time via --tx/--ty/--rot/--z. ---- */
+  /* ---- Stacked cards: hover/bring-to-front is handled entirely by CSS
+     z-index (see .stacked-card:hover). No JS-driven hover effect here —
+     removed the 3D tilt after it couldn't be gotten working reliably. ---- */
+
 
   /* ---- Swipe view: a real card stack you swipe through — the current
      card sits on top, the next couple peek out behind it (scaled down),

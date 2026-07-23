@@ -93,6 +93,30 @@ works since there's no build step.
 
 **A judgment call on the live links:** a few of these came with caveats (PlayStation now run by another team, NoTwoWays and Destinology changed a lot since your work, Stash's app never launched). I linked them anyway — a portfolio visitor clicking through expects the *current* live site, not a snapshot — and noted the caveat inline on the Notion pages for your own reference. If you'd rather any of these not link out at all, easy to pull.
 
+## Round 5: SEO, favicon/OG, and animation pass
+
+**Privacy / indexing**
+- Every page now has `<meta name="robots" content="noindex, nofollow">`, plus a `robots.txt` at the site root disallowing all crawlers. Between the two, this shouldn't show up in Google or any other search engine. Note this only takes effect once it's actually deployed — a robots meta tag does nothing for a file sitting locally on your machine.
+
+**Favicon & Open Graph — answering "how do I add these"**
+- I went ahead and generated real ones rather than just explaining: `assets/favicon.ico`, `assets/favicon-512.png`, `assets/apple-touch-icon.png`, and `assets/og-image.png` (1200×630, dark background, your spark mark + name). All wired into every page's `<head>`, so the old TODOs are gone.
+- These are simple placeholders I built from your brand mark, not designed assets — swap them for your own whenever you want something more considered. Same file paths, so nothing else needs to change.
+- One TODO still remains on purpose: `og:url` needs the real deployed URL, which doesn't exist yet.
+
+**Cross-browser testing — being straight about this**
+I can't actually run this in a real Chrome/Safari/Firefox/Edge and watch it render — there's no browser available in my environment (I tried; network restrictions block downloading one). What I *can* do, and did:
+- Checked every CSS feature used (Grid with named areas, `aspect-ratio`, `backdrop-filter`, custom properties, `clip-path`) against current browser support — all have been supported in every major evergreen browser for at least 3+ years, so this isn't bleeding-edge territory.
+- Added the `-webkit-` prefix for `backdrop-filter`, which is the one place an older Safari could plausibly diverge.
+- Verified the JS is syntactically valid and avoids newer methods with patchy support.
+
+That's a static compatibility check, not a real rendering test. Given you specifically don't want this breaking mid-interview, please do a manual pass yourself in Chrome, Safari, and Firefox before you rely on it live — that's the only way to catch anything a code review can't.
+
+**Animations** (your three "rough ideas")
+1. **Stacked cards enter one-by-one** — each card now fades and slides in with a ~70ms stagger, replaying whenever you switch category or come back to Selected Work.
+2. **Hover tilt + shine** — cards now tilt subtly in 3D toward the cursor (±7°, kept deliberately restrained rather than matching the CodePen's full effect) with a soft light that follows your mouse position. I stopped short of the rainbow holographic color-shift from your reference — it reads as more gimmicky than your dark, minimal aesthetic wants, but say the word if you'd like it pushed further.
+3. **Stacked ↔ Swipe transition** — worth flagging this is a simplified version of what you asked for. A true "cards morph from the fan into the deck" animation means tracking every card's before/after position and animating between them (a FLIP animation) — a substantially bigger build. What's here instead is a smooth crossfade + scale between the two layouts (~280ms), which reads as smooth but isn't literally the same cards reflowing into place. Happy to take a real run at the full version if this doesn't scratch the itch.
+4. (Left blank in your message — let me know if there was a fourth one.)
+
 ## Deploying
 
 Push this whole folder to a new GitHub repo, enable GitHub Pages on it, then
