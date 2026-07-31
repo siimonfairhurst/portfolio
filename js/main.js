@@ -82,6 +82,16 @@
             g.classList.remove('is-entering');
             void g.offsetWidth;
             g.classList.add('is-entering');
+            // cardEnter uses fill-mode "both" so its final keyframe keeps
+            // overriding .stacked-card's transform (and therefore the
+            // hover-tilt) for as long as is-entering stays on the group.
+            // Longest stagger is 5 cards * 70ms delay + the .55s animation
+            // itself; clear the class once that's safely finished so normal
+            // hover styles (including tilt) take back over.
+            clearTimeout(g._enteringTimeout);
+            g._enteringTimeout = setTimeout(() => {
+              g.classList.remove('is-entering');
+            }, 900);
           }
         } else if (isVisible) {
           g.classList.remove('stage-in');
@@ -101,9 +111,45 @@
     render();
   }
 
-  /* ---- Stacked cards: hover/bring-to-front is handled entirely by CSS
-     z-index (see .stacked-card:hover). No JS-driven hover effect here —
-     removed the 3D tilt after it couldn't be gotten working reliably. ---- */
+  /* ---- Shared tilt + shine binder, used by both the stacked deck and the
+     swipe deck. `canTilt`, if given, is checked on every mousemove and lets
+     a card opt out on the fly (used by Swipe to disable tilt on background
+     cards and mid-drag, since dragging overwrites transform directly). ---- */
+  const TILT_MAX_DEG = 10; // kept restrained rather than a full arcade tilt
+
+  function bindTiltAndShine(el, canTilt) {
+    el.addEventListener('mousemove', (e) => {
+      if (canTilt && !canTilt(el)) return;
+      const rect = el.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width;  // 0 (left) → 1 (right)
+      const py = (e.clientY - rect.top) / rect.height;  // 0 (top) → 1 (bottom)
+      const ry = (px - 0.5) * 2 * TILT_MAX_DEG;           // left/right cursor → rotateY
+      const rx = (0.5 - py) * 2 * TILT_MAX_DEG;            // up/down cursor → rotateX
+      el.classList.add('is-tilting');
+      el.style.setProperty('--rx', rx.toFixed(2) + 'deg');
+      el.style.setProperty('--ry', ry.toFixed(2) + 'deg');
+      // Shine position tracks the same cursor coordinates as the tilt.
+      el.style.setProperty('--shine-x', (px * 100).toFixed(1) + '%');
+      el.style.setProperty('--shine-y', (py * 100).toFixed(1) + '%');
+    });
+    el.addEventListener('mouseleave', () => {
+      el.classList.remove('is-tilting');
+      el.style.setProperty('--rx', '0deg');
+      el.style.setProperty('--ry', '0deg');
+    });
+  }
+
+  /* ---- Stacked cards: hover tilt. Bring-to-front is still handled by CSS
+     z-index (see .stacked-card:hover) — this only adds a pointer-tracked
+     rotateX/rotateY on top of the existing --tx/--ty fan position. Sets
+     --rx/--ry as inline custom properties so it never touches the fan
+     layout values already on the element. ---- */
+  function initCardTilt() {
+    const cards = document.querySelectorAll('.stacked-card');
+    if (!cards.length) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    cards.forEach((card) => bindTiltAndShine(card));
+  }
 
 
   /* ---- Swipe view: a real card stack you swipe through — the current
@@ -156,9 +202,15 @@
       if (prevBtn) prevBtn.addEventListener('click', () => goTo(current - 1, cards[current], 1));
       if (nextBtn) nextBtn.addEventListener('click', () => goTo(current + 1, cards[current], -1));
 
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
       cards.forEach((wrap) => {
         let startX = null;
         let dragging = false;
+
+        if (!reduceMotion) {
+          bindTiltAndShine(wrap, (el) => el.classList.contains('is-top') && !el.classList.contains('is-dragging'));
+        }
 
         wrap.addEventListener('pointerdown', (e) => {
           if (e.target.closest('.swipe-cta')) return;
@@ -166,6 +218,13 @@
           startX = e.clientX;
           dragging = true;
           wrap.classList.add('is-dragging');
+          // Drop any tilt in progress — dragging takes over the transform
+          // property directly, so a leftover rotate would otherwise
+          // reappear the instant the drag ends and the inline override
+          // clears.
+          wrap.classList.remove('is-tilting');
+          wrap.style.setProperty('--rx', '0deg');
+          wrap.style.setProperty('--ry', '0deg');
           wrap.setPointerCapture(e.pointerId);
         });
         wrap.addEventListener('pointermove', (e) => {
@@ -224,6 +283,7 @@
     startClock();
     initHomeNav();
     initSelectedWorkControls();
+    initCardTilt();
     initSwipeCards();
     initAllWorkFilters();
   });
