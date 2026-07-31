@@ -3,6 +3,197 @@
    Design system tokens pulled directly from the Figma export brief.
    ========================================================================== */
 
+/* Cross-document View Transitions — lets a clicked homepage card morph into
+   the matching case study's hero banner across a real page navigation.
+   Chrome/Edge only today; other browsers just do a normal instant
+   navigation, so this is pure progressive enhancement, not a dependency.
+   Matching pairs are wired up per-project below (search "view-transition-name"). */
+@view-transition {
+  navigation: auto;
+}
+/* Browser default is a snappy 250ms ease — slow this down and smooth the
+   curve for a more deliberate morph. All four pseudo-elements need this
+   set together: ::view-transition-group handles the box's size/position,
+   while ::view-transition-old/new (inside ::view-transition-image-pair)
+   handle the actual pixel crossfade — leaving one on the fast default
+   makes the shape and the image content finish at different times, which
+   reads as "grows, then separately fades, then snaps" instead of one
+   continuous motion. Applies to the hero pairing and the default page
+   crossfade alike, so nothing finishes ahead of anything else. */
+::view-transition-group(*),
+::view-transition-image-pair(*),
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: 0.7s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* The card and the hero banner crop the same photo at very different
+   aspect ratios (portrait card vs. wide landscape banner). Crossfading
+   between two different framings of the same image reads as a jarring
+   swap rather than a morph, which is what was causing the "grows, then
+   fades, then jumps" feel. Skipping the crossfade and showing only the
+   destination framing throughout means the shape/position animation
+   above does all the work — it reads as one image growing smoothly into
+   place instead. Each project's skip-crossfade pair is defined next to
+   its name-pairing rule, below. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+/* Per-project name pairing. Matches by each image's existing src, so no
+   extra HTML attributes are needed — both the Stacked/Swipe homepage card
+   and the case study's hero banner get the same view-transition-name,
+   which is what lets the browser morph one into the other across the
+   navigation. Each project also gets its own skip-crossfade pair (see the
+   .cs-hero comment above the wildcard rule for why that's needed). */
+img[src="assets/cards/playstation-gear.jpg"],
+img[src="../assets/playstation-gear/master.jpg"] {
+  view-transition-name: card-playstation-gear;
+}
+::view-transition-old(card-playstation-gear) {
+  animation: none;
+  opacity: 0;
+}
+::view-transition-new(card-playstation-gear) {
+  animation: none;
+  opacity: 1;
+}
+img[src="assets/cards/outside-in.jpg"],
+img[src="../assets/outside-in/master.jpg"] {
+  view-transition-name: card-outside-in;
+}
+::view-transition-old(card-outside-in) {
+  animation: none;
+  opacity: 0;
+}
+::view-transition-new(card-outside-in) {
+  animation: none;
+  opacity: 1;
+}
+img[src="assets/cards/nikon.jpg"],
+img[src="../assets/nikon/master.jpg"] {
+  view-transition-name: card-nikon;
+}
+::view-transition-old(card-nikon) {
+  animation: none;
+  opacity: 0;
+}
+::view-transition-new(card-nikon) {
+  animation: none;
+  opacity: 1;
+}
+img[src="assets/cards/notwoways.jpg"],
+img[src="../assets/notwoways/master.jpg"] {
+  view-transition-name: card-notwoways;
+}
+::view-transition-old(card-notwoways) {
+  animation: none;
+  opacity: 0;
+}
+::view-transition-new(card-notwoways) {
+  animation: none;
+  opacity: 1;
+}
+img[src="assets/cards/steamforged-games.jpg"],
+img[src="../assets/steamforged-games/master.jpg"] {
+  view-transition-name: card-steamforged-games;
+}
+::view-transition-old(card-steamforged-games) {
+  animation: none;
+  opacity: 0;
+}
+::view-transition-new(card-steamforged-games) {
+  animation: none;
+  opacity: 1;
+}
+img[src="assets/cards/triumph-motorcycles.jpg"],
+img[src="../assets/triumph-motorcycles/master.jpg"] {
+  view-transition-name: card-triumph-motorcycles;
+}
+::view-transition-old(card-triumph-motorcycles) {
+  animation: none;
+  opacity: 0;
+}
+::view-transition-new(card-triumph-motorcycles) {
+  animation: none;
+  opacity: 1;
+}
+img[src="assets/cards/carv.jpg"],
+img[src="../assets/carv/master.jpg"] {
+  view-transition-name: card-carv;
+}
+::view-transition-old(card-carv) {
+  animation: none;
+  opacity: 0;
+}
+::view-transition-new(card-carv) {
+  animation: none;
+  opacity: 1;
+}
+img[src="assets/cards/mailboard.jpg"],
+img[src="../assets/mailboard/master.jpg"] {
+  view-transition-name: card-mailboard;
+}
+::view-transition-old(card-mailboard) {
+  animation: none;
+  opacity: 0;
+}
+::view-transition-new(card-mailboard) {
+  animation: none;
+  opacity: 1;
+}
+img[src="assets/cards/crunchpos.jpg"],
+img[src="../assets/crunchpos/master.jpg"] {
+  view-transition-name: card-crunchpos;
+}
+::view-transition-old(card-crunchpos) {
+  animation: none;
+  opacity: 0;
+}
+::view-transition-new(card-crunchpos) {
+  animation: none;
+  opacity: 1;
+}
+img[src="assets/cards/pearson-pte.jpg"],
+img[src="../assets/pearson-pte/master.jpg"] {
+  view-transition-name: card-pearson-pte;
+}
+::view-transition-old(card-pearson-pte) {
+  animation: none;
+  opacity: 0;
+}
+::view-transition-new(card-pearson-pte) {
+  animation: none;
+  opacity: 1;
+}
+img[src="assets/cards/splitmetrics.jpg"],
+img[src="../assets/splitmetrics/master.jpg"] {
+  view-transition-name: card-splitmetrics;
+}
+::view-transition-old(card-splitmetrics) {
+  animation: none;
+  opacity: 0;
+}
+::view-transition-new(card-splitmetrics) {
+  animation: none;
+  opacity: 1;
+}
+img[src="assets/cards/stash-finance.jpg"],
+img[src="../assets/stash-finance/master.jpg"] {
+  view-transition-name: card-stash-finance;
+}
+::view-transition-old(card-stash-finance) {
+  animation: none;
+  opacity: 0;
+}
+::view-transition-new(card-stash-finance) {
+  animation: none;
+  opacity: 1;
+}
+
 /* Google Fonts: Instrument Sans, Regular only (per style guide) */
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400&display=swap');
 
@@ -359,6 +550,17 @@ button:focus-visible,
   from { opacity: 0; transform: translate(var(--tx, 0px), calc(var(--ty, 0px) + 18px)) scale(.98); }
   to   { opacity: 1; transform: translate(var(--tx, 0px), var(--ty, 0px)); }
 }
+@keyframes csHeaderEnter {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.cs-header.is-entering {
+  animation: csHeaderEnter .7s cubic-bezier(.16,.8,.24,1) both;
+  animation-delay: .15s; /* lets the hero settle in first before text follows */
+}
+@media (prefers-reduced-motion: reduce) {
+  .cs-header.is-entering { animation: none; }
+}
 .stacked-stage.is-entering .stacked-card {
   animation: cardEnter .55s cubic-bezier(.16,.8,.24,1) both;
   animation-delay: calc(var(--index, 0) * 70ms);
@@ -608,8 +810,50 @@ button:focus-visible,
   margin: 0 auto;
   padding: 140px var(--xl) 0;
 }
+.cs-wrap--has-hero { padding-top: 0; }
+
+/* Hero banner — full-bleed, sits behind the fixed topbar, and reuses the
+   exact image from the homepage card (see view-transition-name pairing
+   below) so a click on the card morphs straight into this. */
+.cs-hero {
+  position: relative;
+  width: 100vw;
+  left: 50%;
+  margin-left: -50vw;
+  /* Hero height is ~107.9vw (100vw at 455:491 aspect-ratio), so pull the
+     header up by roughly half of that — expressed in vw, not px, so the
+     overlap scales with the hero's own vw-driven height instead of being
+     a near-nothing fraction of it on larger screens. */
+  margin-bottom: -58vw;
+  aspect-ratio: 455 / 491; /* matches .stacked-stack / .swipe-deck on the
+    homepage card exactly, so both ends of the transition show the same
+    crop — no framing mismatch left to cause a jump */
+  overflow: hidden;
+  background: var(--grey);
+}
+.cs-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cs-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,0.5) 0%,
+    rgba(0,0,0,0.1) 20%,
+    rgba(22,22,22,0) 35%,
+    var(--bg) 65%
+  );
+  pointer-events: none;
+}
 
 .cs-header {
+  position: relative;
+  z-index: 2;
   display: grid;
   grid-template-columns: 1.5fr 1fr;
   grid-template-areas:

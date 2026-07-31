@@ -279,6 +279,53 @@
     });
   }
 
+  /* ---- Case study hero header entrance. Re-triggers the fade/slide-up
+     every time the page is shown, including a second visit — a plain CSS
+     `animation` only plays once per document and silently skips on a
+     back/forward cache restore.
+     Uses `pagereveal` + the transition's own `finished` promise (not
+     `pageshow`) because pageshow fires too early relative to the browser's
+     own cross-document view-transition lifecycle: if the fade-in starts
+     while the transition is still capturing its "new page" snapshot, that
+     frozen snapshot can catch the header mid-animation, and handing off
+     to the live DOM afterwards then shows as a jump. Waiting for
+     viewTransition.finished guarantees the handoff has already happened.
+     Falls back to pageshow on browsers without pagereveal support. ---- */
+  function initCsHeaderEnter() {
+    const header = document.querySelector('.cs-header');
+    if (!header) return;
+
+    function play() {
+      header.classList.remove('is-entering');
+      void header.offsetWidth; // force reflow so the animation restarts
+      header.classList.add('is-entering');
+    }
+
+    if ('onpagereveal' in window) {
+      window.addEventListener('pagereveal', (e) => {
+        if (e.viewTransition) {
+          e.viewTransition.finished.then(play, play);
+        } else {
+          play();
+        }
+      });
+    } else {
+      window.addEventListener('pageshow', play);
+    }
+  }
+
+  /* ---- Force every navigation to be a fresh page load rather than a
+     back/forward cache restore. Cross-document View Transitions can behave
+     inconsistently when either end of a navigation comes from bfcache
+     instead of a genuine parse — the browser's native card-to-hero morph
+     is pure CSS/browser behaviour with no JS hook to retrigger it (unlike
+     the header fade-in above), so the only reliable fix is to prevent the
+     inconsistent state from happening at all. A no-op `unload` listener is
+     the standard way to opt a page out of bfcache eligibility in Chrome.
+     Trade-off: back/forward navigation loses bfcache's instant restore,
+     in exchange for the hero transition always firing correctly. ---- */
+  window.addEventListener('unload', () => {});
+
   document.addEventListener('DOMContentLoaded', () => {
     startClock();
     initHomeNav();
@@ -286,5 +333,6 @@
     initCardTilt();
     initSwipeCards();
     initAllWorkFilters();
+    initCsHeaderEnter();
   });
 })();

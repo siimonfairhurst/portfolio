@@ -768,7 +768,10 @@ def build_case_study(p):
   <div class="cs-glow" aria-hidden="true"></div>
   {top_case_study_chrome(p, css_prefix="../")}
 
-  <main id="main" class="cs-wrap">
+  <main id="main" class="cs-wrap cs-wrap--has-hero">
+    <div class="cs-hero">
+      <img src="../assets/{p['slug']}/master.jpg" alt="{p['name']}" loading="eager">
+    </div>
     <div class="cs-header">
       <p class="cs-header__label">{p['name']}</p>
       <h1 class="cs-header__title">{p['headline']}</h1>
